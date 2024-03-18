@@ -9,6 +9,9 @@ import {
   ActivityIndicator,
   Modal,
   Alert,
+  SafeAreaView,
+  RefreshControl,
+  ScrollView,
 } from "react-native";
 import FeatherIcon from "react-native-vector-icons/Feather";
 import TextAnimation from "../components/TextRotator";
@@ -19,11 +22,22 @@ const Home = () => {
   const [failed, setFailed] = useState(false);
   const [loading, setLoading] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
+  const [refreshing, setRefreshing] = React.useState(false);
+
+  const onRefresh = React.useCallback(() => {
+    setRefreshing(true);
+    setData(null);
+    setFailed(false);
+
+    setTimeout(() => {
+      setRefreshing(false);
+    }, 2000);
+  }, []);
 
   const getUser = async () => {
     if (!value.trim()) {
       Alert.alert(
-        "Invalid",
+        "Error",
         "Please enter a GitHub username. Field cannot be empty"
       );
       return;
@@ -46,10 +60,6 @@ const Home = () => {
     }
   };
 
-  const handleRefresh = () => {
-    getUser();
-  };
-
   const handleChange = (text) => {
     setValue(text.trim());
   };
@@ -62,16 +72,20 @@ const Home = () => {
   };
 
   return (
-    <View style={styles.container}>
-      <TextAnimation />
-      <View style={styles.wrapper}>
+    <SafeAreaView style={styles.container}>
+      <ScrollView
+        style={styles.wrapper}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
+        <TextAnimation />
         <View style={styles.main}>
           <TextInput
             style={styles.input}
             onChangeText={handleChange}
             placeholder="Enter UserName"
             blurOnSubmit={true}
-            clearButtonMode="unless-editing"
           />
 
           <TouchableOpacity
@@ -81,10 +95,6 @@ const Home = () => {
           >
             <Text style={styles.buttonText}>Search</Text>
           </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.refreshButton}
-            onPress={handleRefresh}
-          ></TouchableOpacity>
         </View>
         {loading && (
           <ActivityIndicator
@@ -130,7 +140,7 @@ const Home = () => {
             </View>
           )
         )}
-      </View>
+      </ScrollView>
       <Modal
         animationType="slide"
         transparent={true}
@@ -195,7 +205,7 @@ const Home = () => {
           )}
         </View>
       </Modal>
-    </View>
+    </SafeAreaView>
   );
 };
 
@@ -206,16 +216,15 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#fff",
   },
-  wrapper: {
-    paddingHorizontal: 15,
-    marginTop: 20,
-  },
 
   header: {
     fontSize: 20,
     fontWeight: "bold",
   },
-  main: {},
+  main: {
+    marginTop: 20,
+    paddingHorizontal: 15,
+  },
   input: {
     height: 50,
     borderColor: "lightgrey",

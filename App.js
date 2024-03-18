@@ -13,7 +13,10 @@ export default function App() {
       <Stack.Navigator>
         <Stack.Screen
           name="Home"
-          options={{ title: "Get git User Info" }}
+          options={{
+            headerTintColor: "#4169e1",
+            title: "",
+          }}
           component={HomeScreen}
         />
         <Stack.Screen
